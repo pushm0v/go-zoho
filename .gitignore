@@ -1,0 +1,14 @@
+vendor/
+bin/
+.idea/
+*.out
+*.log
+*.tmp
+.DS_STORE
+
+# executables & libs
+*.exe
+*.so
+*.dll
+*.test
+*.dylib
