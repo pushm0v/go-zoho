@@ -1,6 +1,6 @@
 # go-zoho
 
-go-zoho is a Golang library for dealing with [ZOHO CRM](zoho.com).
+go-zoho is a Golang library for dealing with [ZOHO CRM](https://zoho.com).
 
 ## Installation
 
