@@ -18,14 +18,7 @@ type ZohoOauthClientSuite struct {
 	suite.Suite
 	httpClient httpClient.HttpClient
 	storage    *storage.Storage
-	params     TestZohoParams
-}
-
-type TestZohoParams struct {
-	GrantToken   string
-	ClientID     string
-	ClientSecret string
-	IAMURL       string
+	params     ZohoAuthParams
 }
 
 func TestZohoAuthClientSuite(t *testing.T) {
@@ -36,11 +29,11 @@ func (suite *ZohoOauthClientSuite) SetupTest() {
 	sMock := serverMock()
 	suite.httpClient = httpClient.NewHttpClient(sMock.Client())
 	suite.storage = storage.NewStorage()
-	suite.params = TestZohoParams{
+	suite.params = ZohoAuthParams{
 		GrantToken:   "some-token",
 		ClientID:     "some",
 		ClientSecret: "some",
-		IAMURL:       sMock.URL,
+		IamURL:       sMock.URL,
 	}
 }
 
@@ -66,15 +59,15 @@ func tokenMock(w http.ResponseWriter, r *http.Request) {
 }
 
 func (suite *ZohoOauthClientSuite) TestGenerateToken() {
-	client := NewZohoAuthClient(suite.httpClient, suite.storage)
-	err := client.GenerateToken(suite.params.ClientID, suite.params.ClientSecret, suite.params.GrantToken, suite.params.IAMURL)
+	client := NewZohoAuthClient(suite.params, suite.httpClient, suite.storage)
+	err := client.GenerateToken()
 	assert.Nil(suite.T(), err, "Error should be nil")
 }
 
 func (suite *ZohoOauthClientSuite) TestRefreshToken() {
-	client := NewZohoAuthClient(suite.httpClient, suite.storage)
+	client := NewZohoAuthClient(suite.params, suite.httpClient, suite.storage)
 
-	err := client.GenerateToken(suite.params.ClientID, suite.params.ClientSecret, suite.params.GrantToken, suite.params.IAMURL)
+	err := client.GenerateToken()
 	assert.Nil(suite.T(), err, "Error should be nil")
 
 	err = client.RefreshToken()
@@ -83,12 +76,12 @@ func (suite *ZohoOauthClientSuite) TestRefreshToken() {
 }
 
 func (suite *ZohoOauthClientSuite) TestOnSuccessGenerateToken() {
-	client := NewZohoAuthClient(suite.httpClient, suite.storage)
+	client := NewZohoAuthClient(suite.params, suite.httpClient, suite.storage)
 	expectedAccessToken := "some-token"
 	success := func(t OauthToken) {
 		assert.Equal(suite.T(), expectedAccessToken, t.AccessToken, "Access Token is not same")
 	}
 	client.OnSuccessTokenGeneration(success)
-	err := client.GenerateToken(suite.params.ClientID, suite.params.ClientSecret, suite.params.GrantToken, suite.params.IAMURL)
+	err := client.GenerateToken()
 	assert.Nil(suite.T(), err, "Error should be nil")
 }

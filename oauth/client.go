@@ -16,48 +16,49 @@ const (
 )
 
 type ZohoAuthClient interface {
-	GenerateToken(clientID, clientSecret, grantToken, iAMURL string) error
+	GenerateToken() error
 	RefreshToken() error
 	OnSuccessTokenGeneration(f func(token OauthToken))
 }
 
 type zohoAuthClient struct {
-	clientID      string
-	clientSecret  string
-	grantToken    string
-	iAMURL        string
+	authParams ZohoAuthParams
 	httpClient    http.HttpClient
 	storage       *storage.Storage
 	onSuccessFunc func(token OauthToken)
 }
 
-func NewZohoAuthClient(httpClient http.HttpClient, storage *storage.Storage) ZohoAuthClient {
+type ZohoAuthParams struct {
+	ClientID      string
+	ClientSecret  string
+	GrantToken    string
+	IamURL        string
+}
+
+func NewZohoAuthClient(authParams ZohoAuthParams, httpClient http.HttpClient, storage *storage.Storage) ZohoAuthClient {
 	return &zohoAuthClient{
+		authParams: authParams,
 		httpClient: httpClient,
 		storage:    storage,
 	}
 }
 
 func (z *zohoAuthClient) appendClientCredential(params map[string]interface{}) map[string]interface{} {
-	params["client_id"] = z.clientID
-	params["client_secret"] = z.clientSecret
+	params["client_id"] = z.authParams.ClientID
+	params["client_secret"] = z.authParams.ClientSecret
 
 	return params
 }
 
 func (z *zohoAuthClient) getURL(URL string) string {
-	return fmt.Sprintf("%s%s", z.iAMURL, URL)
+	return fmt.Sprintf("%s%s", z.authParams.IamURL, URL)
 }
 
-func (z *zohoAuthClient) GenerateToken(clientID, clientSecret, grantToken, iAMURL string) error {
-	z.clientID = clientID
-	z.clientSecret = clientSecret
-	z.grantToken = grantToken
-	z.iAMURL = iAMURL
+func (z *zohoAuthClient) GenerateToken() error {
 
 	var params = map[string]interface{}{
 		"grant_type": "authorization_code",
-		"code":       grantToken,
+		"code":       z.authParams.GrantToken,
 	}
 	params = z.appendClientCredential(params)
 
