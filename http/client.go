@@ -54,6 +54,5 @@ func (h *httpClient) BodyWriter(params map[string]interface{}) (*bytes.Buffer, *
 }
 
 func (h *httpClient) WithAuthorization(accessToken string) {
-	fmt.Println(accessToken)
 	h.authorizationToken = accessToken
 }
