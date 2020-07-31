@@ -3,7 +3,7 @@ package api
 import "github.com/pushm0v/go-zoho/http"
 
 type Option struct {
-	ApiUrl ApiUrl
+	ApiUrl     ApiUrl
 	HttpClient http.HttpClient
 }
 
@@ -14,7 +14,7 @@ type CrmApi struct {
 	Option       Option
 	ApiBulkWrite ApiBulkWrite
 	ApiMetadata  ApiMetadata
-	ApiModules  ApiModules
+	ApiModules   ApiModules
 }
 
 func WithApiBulkWrite() ApiOption {
@@ -25,5 +25,10 @@ func WithApiBulkWrite() ApiOption {
 func WithApiModules() ApiOption {
 	return func(a *CrmApi) {
 		a.ApiModules = NewApiModules(a.Option)
+	}
+}
+func WithApiMetadata() ApiOption {
+	return func(a *CrmApi) {
+		a.ApiMetadata = NewApiMetadata(a.Option)
 	}
 }

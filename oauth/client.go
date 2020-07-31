@@ -22,17 +22,17 @@ type ZohoAuthClient interface {
 }
 
 type zohoAuthClient struct {
-	authParams ZohoAuthParams
+	authParams    ZohoAuthParams
 	httpClient    http.HttpClient
 	storage       *storage.Storage
 	onSuccessFunc func(token OauthToken)
 }
 
 type ZohoAuthParams struct {
-	ClientID      string
-	ClientSecret  string
-	GrantToken    string
-	IamURL        string
+	ClientID     string
+	ClientSecret string
+	GrantToken   string
+	IamURL       string
 }
 
 func NewZohoAuthClient(authParams ZohoAuthParams, httpClient http.HttpClient, storage *storage.Storage) ZohoAuthClient {
@@ -62,7 +62,7 @@ func (z *zohoAuthClient) GenerateToken() error {
 	}
 	params = z.appendClientCredential(params)
 
-	resp, err := z.httpClient.Request("POST", z.getURL(ZOHO_OAUTH_TOKEN_URL), params)
+	resp, err := z.httpClient.Post(z.getURL(ZOHO_OAUTH_TOKEN_URL), params)
 	if err != nil {
 		return err
 	}
@@ -99,7 +99,7 @@ func (z *zohoAuthClient) RefreshToken() error {
 	}
 	params = z.appendClientCredential(params)
 
-	resp, err := z.httpClient.Request("POST", z.getURL(ZOHO_OAUTH_REFRESH_TOKEN_URL), params)
+	resp, err := z.httpClient.Post(z.getURL(ZOHO_OAUTH_REFRESH_TOKEN_URL), params)
 	if err != nil {
 		return err
 	}

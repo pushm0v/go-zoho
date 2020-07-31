@@ -31,7 +31,7 @@ func NewApiModules(option Option) ApiModules {
 func (m *apiModules) List() (err error, modules []models.Modules) {
 	var params = map[string]interface{}{}
 
-	resp, err := m.option.HttpClient.Request("GET", m.option.ApiUrl(ZOHO_CRM_API_MODULES_URL), params)
+	resp, err := m.option.HttpClient.Get(m.option.ApiUrl(ZOHO_CRM_API_MODULES_URL), params)
 	if err != nil {
 		return
 	}
