@@ -22,7 +22,7 @@ func TestZohoCrmApiModulesSuite(t *testing.T) {
 }
 
 func (suite *ZohoCrmAPiModulesSuite) SetupTest() {
-	sMock := serverMock()
+	sMock := suite.serverMock()
 	suite.url = sMock.URL
 	hClient := httpClient.NewHttpClient(sMock.Client())
 	suite.api = NewApiModules(Option{
@@ -35,16 +35,16 @@ func (suite *ZohoCrmAPiModulesSuite) apiUrlMock(url string) string {
 	return fmt.Sprintf("%s%s", suite.url, url)
 }
 
-func serverMock() *httptest.Server {
+func (suite *ZohoCrmAPiModulesSuite) serverMock() *httptest.Server {
 	handler := http.NewServeMux()
-	handler.HandleFunc(ZOHO_CRM_API_MODULES_URL, modulesMock)
+	handler.HandleFunc(ZOHO_CRM_API_MODULES_URL, suite.modulesMock)
 
 	srv := httptest.NewServer(handler)
 
 	return srv
 }
 
-func modulesMock(w http.ResponseWriter, r *http.Request) {
+func (suite *ZohoCrmAPiModulesSuite) modulesMock(w http.ResponseWriter, r *http.Request) {
 	var data = []byte(`{
 		"modules": [{
 			"id": "some-id",
@@ -60,4 +60,7 @@ func (suite *ZohoCrmAPiModulesSuite) TestList() {
 	err, modules := suite.api.List()
 	assert.Nil(suite.T(), err, "Error should be nil")
 	assert.Equal(suite.T(), 1, len(modules), "Modules should not be empty")
+	assert.Equal(suite.T(), "id", modules[0].ID, "ID not match")
+	assert.Equal(suite.T(), "api_name", modules[0].ApiName, "API name not match")
+	assert.Equal(suite.T(), "module_name", modules[0].ModuleName, "Module name not match")
 }

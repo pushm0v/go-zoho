@@ -11,10 +11,11 @@ type ApiUrl func(string) string
 type ApiOption func(*CrmApi)
 
 type CrmApi struct {
-	Option       Option
-	ApiBulkWrite ApiBulkWrite
-	ApiMetadata  ApiMetadata
-	ApiModules   ApiModules
+	Option          Option
+	ApiBulkWrite    ApiBulkWrite
+	ApiMetadata     ApiMetadata
+	ApiModules      ApiModules
+	ApiOrganization ApiOrganization
 }
 
 func WithApiBulkWrite() ApiOption {
@@ -27,8 +28,15 @@ func WithApiModules() ApiOption {
 		a.ApiModules = NewApiModules(a.Option)
 	}
 }
+
 func WithApiMetadata() ApiOption {
 	return func(a *CrmApi) {
 		a.ApiMetadata = NewApiMetadata(a.Option)
+	}
+}
+
+func WithApiOrganization() ApiOption {
+	return func(a *CrmApi) {
+		a.ApiOrganization = NewApiOrganization(a.Option)
 	}
 }

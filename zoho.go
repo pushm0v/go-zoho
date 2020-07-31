@@ -12,6 +12,7 @@ import (
 
 type Zoho interface {
 	Authenticate() error
+	Reauthenticate() error
 	Crm() crm.ZohoCrmClient
 }
 
@@ -45,9 +46,10 @@ func NewZoho(params ZohoParams, httpClient *http.Client) Zoho {
 	} else {
 		hClient = http2.NewHttpClient(httpClient)
 	}
+	var storage = defaultStorage()
 
 	return &zoho{
-		oauth: newOauthClient(authParams, hClient),
+		oauth: newOauthClient(authParams, hClient, storage),
 		crm:   newCrmClient(crmParams, hClient),
 	}
 }
@@ -60,8 +62,7 @@ func defaultHttpClient() http2.HttpClient {
 	return http2.NewHttpClient(new(http.Client))
 }
 
-func newOauthClient(authParams oauth.ZohoAuthParams, httpClient http2.HttpClient) oauth.ZohoAuthClient {
-	var storage = defaultStorage()
+func newOauthClient(authParams oauth.ZohoAuthParams, httpClient http2.HttpClient, storage *storage2.Storage) oauth.ZohoAuthClient {
 	return oauth.NewZohoAuthClient(authParams, httpClient, storage)
 }
 
@@ -71,6 +72,10 @@ func newCrmClient(crmParams crm.ZohoCrmParams, httpClient http2.HttpClient) crm.
 
 func (z *zoho) Authenticate() error {
 	return z.oauth.GenerateToken()
+}
+
+func (z *zoho) Reauthenticate() error {
+	return z.oauth.RefreshToken()
 }
 
 func (z *zoho) Crm() crm.ZohoCrmClient {
