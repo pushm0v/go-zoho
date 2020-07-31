@@ -3,11 +3,13 @@ package api
 import "github.com/pushm0v/go-zoho/http"
 
 type Option struct {
-	ApiUrl     ApiUrl
-	HttpClient http.HttpClient
+	ApiUrl        ApiUrl
+	FileUploadUrl FileUploadUrl
+	HttpClient    http.HttpClient
 }
 
 type ApiUrl func(string) string
+type FileUploadUrl func(string) string
 type ApiOption func(*CrmApi)
 
 type CrmApi struct {

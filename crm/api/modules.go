@@ -11,7 +11,7 @@ const (
 )
 
 type ApiModules interface {
-	List() (err error, modules []models.Modules)
+	List() (modules []models.Modules, err error)
 }
 
 type apiModules struct {
@@ -28,7 +28,7 @@ func NewApiModules(option Option) ApiModules {
 	}
 }
 
-func (m *apiModules) List() (err error, modules []models.Modules) {
+func (m *apiModules) List() (modules []models.Modules, err error) {
 	var params = map[string]interface{}{}
 
 	resp, err := m.option.HttpClient.Get(m.option.ApiUrl(ZOHO_CRM_API_MODULES_URL), params)
@@ -44,5 +44,5 @@ func (m *apiModules) List() (err error, modules []models.Modules) {
 		return
 	}
 
-	return nil, respModules.Root
+	return respModules.Root, nil
 }

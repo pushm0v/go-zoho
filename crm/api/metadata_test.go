@@ -71,13 +71,13 @@ func (suite *ZohoCrmAPiMetadataSuite) fieldsMock(w http.ResponseWriter, r *http.
 }
 
 func (suite *ZohoCrmAPiMetadataSuite) TestListFields() {
-	err, fields := suite.api.ListFields("test")
+	fields, err := suite.api.ListFields("test")
 	assert.Nil(suite.T(), err, "Error should be nil")
 	assert.Equal(suite.T(), 1, len(fields), "Fields should not be empty")
 }
 
 func (suite *ZohoCrmAPiMetadataSuite) TestListFieldsNoModuleName() {
-	err, fields := suite.api.ListFields("")
+	fields, err := suite.api.ListFields("")
 	assert.NotNil(suite.T(), err, "Error should be not nil")
 	assert.Equal(suite.T(), 0, len(fields), "Fields should be empty")
 }

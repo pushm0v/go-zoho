@@ -56,7 +56,7 @@ func (suite *ZohoCrmAPiOrganizationSuite) organizationMock(w http.ResponseWriter
 }
 
 func (suite *ZohoCrmAPiOrganizationSuite) TestDetails() {
-	err, details := suite.api.Details()
+	details, err := suite.api.Details()
 	assert.Nil(suite.T(), err, "Error should be nil")
 	assert.Equal(suite.T(), 1, len(details), "Organization should not be empty")
 	assert.Equal(suite.T(), "123", details[0].ZGID, "ZGID not match")

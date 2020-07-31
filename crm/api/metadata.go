@@ -11,7 +11,7 @@ const (
 )
 
 type ApiMetadata interface {
-	ListFields(string) (err error, fields []models.Fields)
+	ListFields(string) (fields []models.Fields, err error)
 }
 
 type apiMetadata struct {
@@ -28,7 +28,7 @@ func NewApiMetadata(option Option) ApiMetadata {
 	}
 }
 
-func (m *apiMetadata) ListFields(moduleName string) (err error, fields []models.Fields) {
+func (m *apiMetadata) ListFields(moduleName string) (fields []models.Fields, err error) {
 	var params = map[string]interface{}{
 		"module": moduleName,
 	}
@@ -46,5 +46,5 @@ func (m *apiMetadata) ListFields(moduleName string) (err error, fields []models.
 		return
 	}
 
-	return nil, responseFields.Root
+	return responseFields.Root, nil
 }

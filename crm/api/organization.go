@@ -11,7 +11,7 @@ const (
 )
 
 type ApiOrganization interface {
-	Details() (err error, orgs []models.Organization)
+	Details() (orgs []models.Organization, err error)
 }
 
 type apiOrganization struct {
@@ -28,7 +28,7 @@ func NewApiOrganization(option Option) ApiOrganization {
 	}
 }
 
-func (m *apiOrganization) Details() (err error, orgs []models.Organization) {
+func (m *apiOrganization) Details() (orgs []models.Organization, err error) {
 	var params = map[string]interface{}{}
 
 	resp, err := m.option.HttpClient.Get(m.option.ApiUrl(ZOHO_CRM_API_ORGANIZATION_URL), params)
@@ -44,5 +44,5 @@ func (m *apiOrganization) Details() (err error, orgs []models.Organization) {
 		return
 	}
 
-	return nil, respOrgs.Root
+	return respOrgs.Root, nil
 }

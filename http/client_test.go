@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -58,4 +59,22 @@ func (suite *ZohoHttpClientSuite) TestGetRequest() {
 	assert.Equal(suite.T(), expectedMethod, resp.Request.Method)
 	assert.Equal(suite.T(), expectedURL, resp.Request.URL.String())
 	assert.Equal(suite.T(), "1", resp.Request.URL.Query().Get("some-key"))
+}
+
+func (suite *ZohoHttpClientSuite) TestUploadZIPRequest() {
+	cHttp := NewHttpClient(suite.httpClient)
+	expectedMethod := "POST"
+	expectedURL := suite.httpServer.URL
+	params := map[string]interface{}{
+		"some-key": 1,
+	}
+	headers := map[string]interface{}{
+		"some-headers": "some-value",
+	}
+	var fakeFile = strings.NewReader("fake, csv, data")
+	resp, err := cHttp.UploadZIP(expectedURL, params, headers, fakeFile)
+	assert.NoError(suite.T(), err, "Error should be nil")
+	assert.Equal(suite.T(), expectedMethod, resp.Request.Method)
+	assert.Equal(suite.T(), expectedURL, resp.Request.URL.String())
+	assert.Equal(suite.T(), "some-value", resp.Request.Header.Get("some-headers"))
 }

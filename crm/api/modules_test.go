@@ -57,10 +57,10 @@ func (suite *ZohoCrmAPiModulesSuite) modulesMock(w http.ResponseWriter, r *http.
 }
 
 func (suite *ZohoCrmAPiModulesSuite) TestList() {
-	err, modules := suite.api.List()
+	modules, err := suite.api.List()
 	assert.Nil(suite.T(), err, "Error should be nil")
 	assert.Equal(suite.T(), 1, len(modules), "Modules should not be empty")
-	assert.Equal(suite.T(), "id", modules[0].ID, "ID not match")
-	assert.Equal(suite.T(), "api_name", modules[0].ApiName, "API name not match")
-	assert.Equal(suite.T(), "module_name", modules[0].ModuleName, "Module name not match")
+	assert.Equal(suite.T(), "some-id", modules[0].ID, "ID not match")
+	assert.Equal(suite.T(), "api-name", modules[0].ApiName, "API name not match")
+	assert.Equal(suite.T(), "module-name", modules[0].ModuleName, "Module name not match")
 }
