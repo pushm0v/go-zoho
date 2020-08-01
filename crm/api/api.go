@@ -6,11 +6,13 @@ type Option struct {
 	ApiUrl        ApiUrl
 	FileUploadUrl FileUploadUrl
 	HttpClient    http.HttpClient
+	ApiParams     ApiParams
 }
 
 type ApiUrl func(string) string
 type FileUploadUrl func(string) string
 type ApiOption func(*CrmApi)
+type ApiParams func(string) interface{}
 
 type CrmApi struct {
 	Option          Option

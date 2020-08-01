@@ -3,12 +3,11 @@ package http
 import (
 	"bytes"
 	"fmt"
-	"github.com/pushm0v/go-zoho/common"
 	"io"
-	"mime"
 	"mime/multipart"
 	"net/http"
-	"net/textproto"
+
+	"github.com/pushm0v/go-zoho/common"
 )
 
 type HttpClient interface {
@@ -46,8 +45,10 @@ func (h *httpClient) Get(url string, params map[string]interface{}) (resp *http.
 }
 
 func (h *httpClient) Post(url string, params map[string]interface{}) (resp *http.Response, err error) {
-
 	reqBody, bodyWriter := h.BodyWriter(params)
+
+	//Dont forget to close writer before NewRequest, see : https://stackoverflow.com/questions/47452046/how-to-compute-content-length-of-multipart-file-request-with-formdata-in-go
+	bodyWriter.Close()
 	req, err := http.NewRequest(common.HTTP_METHOD_POST, url, reqBody)
 	if err != nil {
 		return nil, fmt.Errorf("Error when create new HTTP POST request, %v", err)
@@ -59,11 +60,7 @@ func (h *httpClient) Post(url string, params map[string]interface{}) (resp *http
 
 func (h *httpClient) UploadZIP(url string, params map[string]interface{}, headers map[string]interface{}, handler io.Reader) (resp *http.Response, err error) {
 	reqBody, bodyWriter := h.BodyWriter(params)
-
-	mimeHeader := textproto.MIMEHeader{}
-	mimeHeader.Set("Content-Disposition", `form-data; name="file"; filename="file.zip"`)
-	mimeHeader.Set("Content-Type", mime.TypeByExtension(".zip"))
-	part, err := bodyWriter.CreatePart(mimeHeader)
+	part, err := bodyWriter.CreateFormFile("file", "file.zip")
 	if err != nil {
 		return nil, fmt.Errorf("Error when create new HTTP UploadZIP request, %v", err)
 	}
@@ -72,6 +69,8 @@ func (h *httpClient) UploadZIP(url string, params map[string]interface{}, header
 		return nil, fmt.Errorf("Error when create new HTTP UploadZIP request, %v", err)
 	}
 
+	//Dont forget to close writer before NewRequest, see : https://stackoverflow.com/questions/47452046/how-to-compute-content-length-of-multipart-file-request-with-formdata-in-go
+	bodyWriter.Close()
 	req, err := http.NewRequest(common.HTTP_METHOD_POST, url, reqBody)
 	if err != nil {
 		return nil, fmt.Errorf("Error when create new HTTP UploadZIP request, %v", err)
@@ -80,6 +79,7 @@ func (h *httpClient) UploadZIP(url string, params map[string]interface{}, header
 	for k, v := range headers {
 		req.Header.Set(k, fmt.Sprintf("%v", v))
 	}
+
 	return h.request(req)
 }
 
@@ -99,7 +99,7 @@ func (h *httpClient) BodyWriter(params map[string]interface{}) (*bytes.Buffer, *
 	for k, v := range params {
 		bodyWriter.WriteField(k, fmt.Sprintf("%v", v))
 	}
-	bodyWriter.Close()
+
 	return bodyBuf, bodyWriter
 }
 

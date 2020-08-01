@@ -17,6 +17,7 @@ type zohoCrmClient struct {
 }
 
 type ZohoCrmParams struct {
+	ZGID          string
 	CrmURL        string
 	FileUploadURL string
 }
@@ -37,6 +38,7 @@ func (z *zohoCrmClient) newApiOption() api.Option {
 		ApiUrl:        z.constructApiUrl,
 		FileUploadUrl: z.constructFileUPloadUrl,
 		HttpClient:    z.HttpClient,
+		ApiParams:     z.getApiParams,
 	}
 }
 
@@ -46,6 +48,13 @@ func (z *zohoCrmClient) constructApiUrl(url string) string {
 
 func (z *zohoCrmClient) constructFileUPloadUrl(url string) string {
 	return fmt.Sprintf("%s%s", z.Params.FileUploadURL, url)
+}
+
+func (z *zohoCrmClient) getApiParams(key string) interface{} {
+	var apiParams = map[string]interface{}{
+		"ZGID": z.Params.ZGID,
+	}
+	return apiParams[key]
 }
 
 func (z *zohoCrmClient) Api(opts ...api.ApiOption) *api.CrmApi {

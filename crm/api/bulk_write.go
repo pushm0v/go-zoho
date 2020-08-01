@@ -20,11 +20,11 @@ type apiBulkWrite struct {
 }
 
 type responseUploadZIP struct {
-	Status string `json:"status"`
-	Code string `json:"code"`
+	Status  string `json:"status"`
+	Code    string `json:"code"`
 	Message string `json:"message"`
 	Details struct {
-		FileID string `json:"file_id"`
+		FileID      string `json:"file_id"`
 		CreatedTime string `json:"created_time"`
 	} `json:"details"`
 }
@@ -41,7 +41,10 @@ func (bw *apiBulkWrite) Write() {
 
 func (bw *apiBulkWrite) UploadZIP(handler io.Reader) (fileID string, err error) {
 	var params = map[string]interface{}{}
-	var headers = map[string]interface{}{}
+	var headers = map[string]interface{}{
+		"feature":   "bulk-write",
+		"X-CRM-ORG": bw.option.ApiParams("ZGID"),
+	}
 
 	resp, err := bw.option.HttpClient.UploadZIP(bw.option.FileUploadUrl(ZOHO_CRM_API_BULK_WRITE_UPLOAD_URL), params, headers, handler)
 	if err != nil {
@@ -57,7 +60,7 @@ func (bw *apiBulkWrite) UploadZIP(handler io.Reader) (fileID string, err error) 
 	}
 
 	if respUpload.Details.FileID == "" {
-		return "", fmt.Errorf("%v", respUpload.Message)
+		return "", fmt.Errorf("%+v", respUpload)
 	}
 
 	return respUpload.Details.FileID, err

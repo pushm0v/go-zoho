@@ -27,10 +27,15 @@ func (suite *ZohoCrmAPIBulkWriteSuite) SetupTest() {
 	suite.url = sMock.URL
 	hClient := httpClient.NewHttpClient(sMock.Client())
 	suite.api = NewApiBulkWrite(Option{
-		ApiUrl:     suite.apiUrlMock,
-		FileUploadUrl:     suite.apiUrlMock,
-		HttpClient: hClient,
+		ApiUrl:        suite.apiUrlMock,
+		FileUploadUrl: suite.apiUrlMock,
+		HttpClient:    hClient,
+		ApiParams:     suite.apiParamsMock,
 	})
+}
+
+func (suite *ZohoCrmAPIBulkWriteSuite) apiParamsMock(key string) interface{} {
+	return key
 }
 
 func (suite *ZohoCrmAPIBulkWriteSuite) apiUrlMock(url string) string {
