@@ -47,6 +47,21 @@ func (suite *ZohoHttpClientSuite) TestPostRequest() {
 	assert.Equal(suite.T(), expectedURL, resp.Request.URL.String())
 }
 
+func (suite *ZohoHttpClientSuite) TestPostJsonRequest() {
+	cHttp := NewHttpClient(suite.httpClient)
+	expectedMethod := "POST"
+	expectedContentType := "application/json"
+	expectedURL := suite.httpServer.URL
+	params := map[string]interface{}{
+		"some-key": 1,
+	}
+	resp, err := cHttp.PostJson(expectedURL, params)
+	assert.NoError(suite.T(), err, "Error should be nil")
+	assert.Equal(suite.T(), expectedMethod, resp.Request.Method)
+	assert.Equal(suite.T(), expectedURL, resp.Request.URL.String())
+	assert.Equal(suite.T(), expectedContentType, resp.Request.Header["Content-Type"][0])
+}
+
 func (suite *ZohoHttpClientSuite) TestGetRequest() {
 	cHttp := NewHttpClient(suite.httpClient)
 	expectedMethod := "GET"
