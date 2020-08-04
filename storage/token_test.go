@@ -3,6 +3,8 @@ package storage
 import (
 	"testing"
 
+	"github.com/pushm0v/go-zoho/cache"
+
 	"github.com/stretchr/testify/assert"
 
 	"github.com/stretchr/testify/suite"
@@ -18,7 +20,7 @@ func TestZohoTokenStorageSuite(t *testing.T) {
 }
 
 func (suite *ZohoTokenStorageSuite) SetupTest() {
-	suite.storage = NewStorage()
+	suite.storage = NewStorage(cache.NewCache(cache.WithLocalCache()))
 }
 
 func (suite *ZohoTokenStorageSuite) TestSave() {

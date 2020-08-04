@@ -1,9 +1,6 @@
 package storage
 
 import (
-	"time"
-
-	"github.com/patrickmn/go-cache"
 	cache2 "github.com/pushm0v/go-zoho/cache"
 )
 
@@ -14,12 +11,12 @@ type TokenStorage interface {
 }
 
 type tokenStorage struct {
-	cache *cache.Cache
+	cache cache2.Cache
 }
 
-func NewTokenStorage() TokenStorage {
+func NewTokenStorage(cache cache2.Cache) TokenStorage {
 	return &tokenStorage{
-		cache: cache2.NewLocalCache(),
+		cache: cache,
 	}
 }
 
@@ -32,8 +29,8 @@ func (t *tokenStorage) AccessToken() string {
 }
 
 func (t *tokenStorage) loadToken(tokenName string) string {
-	token, found := t.cache.Get(tokenName)
-	if found {
+	token, err := t.cache.Get(tokenName)
+	if err == nil && token != nil {
 		return token.(string)
 	}
 
@@ -41,6 +38,7 @@ func (t *tokenStorage) loadToken(tokenName string) string {
 }
 
 func (t *tokenStorage) SaveToken(accessToken, refreshToken string, expire int) {
-	t.cache.Set("access_token", accessToken, time.Duration(expire)*time.Second)
-	t.cache.Set("refresh_token", refreshToken, time.Duration(expire)*time.Second)
+	//t.cache.Set("access_token", accessToken, time.Duration(expire)*time.Second)
+	t.cache.Set("access_token", accessToken, expire)
+	t.cache.Set("refresh_token", refreshToken, expire)
 }

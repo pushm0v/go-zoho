@@ -3,6 +3,8 @@ package zoho
 import (
 	"net/http"
 
+	"github.com/pushm0v/go-zoho/cache"
+
 	"github.com/pushm0v/go-zoho/crm"
 
 	http2 "github.com/pushm0v/go-zoho/http"
@@ -52,7 +54,8 @@ func NewZoho(params ZohoParams, httpClient *http.Client) Zoho {
 	} else {
 		hClient = http2.NewHttpClient(httpClient)
 	}
-	var storage = defaultStorage()
+	var defCache = defaultCache()
+	var storage = defaultStorage(defCache)
 
 	return &zoho{
 		oauth: newOauthClient(authParams, hClient, storage),
@@ -60,8 +63,12 @@ func NewZoho(params ZohoParams, httpClient *http.Client) Zoho {
 	}
 }
 
-func defaultStorage() *storage2.Storage {
-	return storage2.NewStorage()
+func defaultCache() cache.Cache {
+	return cache.NewCache(cache.WithLocalCache())
+}
+
+func defaultStorage(cache2 cache.Cache) *storage2.Storage {
+	return storage2.NewStorage(cache2)
 }
 
 func defaultHttpClient() http2.HttpClient {

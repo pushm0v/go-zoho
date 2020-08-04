@@ -6,6 +6,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/pushm0v/go-zoho/cache"
+
 	"github.com/pushm0v/go-zoho/storage"
 
 	httpClient "github.com/pushm0v/go-zoho/http"
@@ -28,7 +30,7 @@ func TestZohoAuthClientSuite(t *testing.T) {
 func (suite *ZohoOauthClientSuite) SetupTest() {
 	sMock := serverMock()
 	suite.httpClient = httpClient.NewHttpClient(sMock.Client())
-	suite.storage = storage.NewStorage()
+	suite.storage = storage.NewStorage(cache.NewCache(cache.WithLocalCache()))
 	suite.params = ZohoAuthParams{
 		GrantToken:   "some-token",
 		ClientID:     "some",

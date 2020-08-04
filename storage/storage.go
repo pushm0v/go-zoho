@@ -1,15 +1,13 @@
 package storage
 
+import "github.com/pushm0v/go-zoho/cache"
+
 type Storage struct {
 	Token TokenStorage
 }
 
-func NewStorage() *Storage {
+func NewStorage(cache cache.Cache) *Storage {
 	return &Storage{
-		Token: newTokenStorage(),
+		Token: NewTokenStorage(cache),
 	}
-}
-
-func newTokenStorage() TokenStorage {
-	return NewTokenStorage()
 }
