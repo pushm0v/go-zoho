@@ -33,7 +33,7 @@ func (m *apiMetadata) ListFields(moduleName string) (fields []models.Fields, err
 		"module": moduleName,
 	}
 
-	resp, err := m.option.HttpClient.Get(m.option.ApiUrl(ZOHO_CRN_API_METADATA_FIELDS_URL), params)
+	resp, err := m.option.HttpClient.Get(m.option.ApiUrl(ZOHO_CRN_API_METADATA_FIELDS_URL, false), params)
 	if err != nil {
 		return
 	}

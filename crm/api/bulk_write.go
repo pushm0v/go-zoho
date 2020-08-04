@@ -20,7 +20,7 @@ type JobResource struct {
 	Type        string `json:"type"`
 	Module      string `json:"module"`
 	FileID      string `json:"file_id"`
-	IgnoreEmpty bool   `json:"ignore_empty"`
+	IgnoreEmpty bool   `json:"ignore_empty,omitempty"`
 }
 
 const (
@@ -31,8 +31,8 @@ const (
 
 type ApiBulkWriteJobParams struct {
 	Operation JobOperationType `json:"operation"`
-	Callback  JobCallback      `json:"callback"`
-	Resource  JobResource      `json:"resource"`
+	Callback  JobCallback      `json:"callback,omitempty"`
+	Resource  []JobResource    `json:"resource"`
 }
 
 type ApiBulkWrite interface {
@@ -69,7 +69,7 @@ func NewApiBulkWrite(option Option) ApiBulkWrite {
 }
 
 func (bw *apiBulkWrite) CreateJob(params ApiBulkWriteJobParams) (jobID string, err error) {
-	resp, err := bw.option.HttpClient.PostJson(bw.option.ApiUrl(ZOHO_CRM_API_BULK_WRITE_CREATE_JOB_URL), params)
+	resp, err := bw.option.HttpClient.PostJson(bw.option.ApiUrl(ZOHO_CRM_API_BULK_WRITE_CREATE_JOB_URL, true), params)
 	if err != nil {
 		return
 	}
@@ -80,6 +80,10 @@ func (bw *apiBulkWrite) CreateJob(params ApiBulkWriteJobParams) (jobID string, e
 	err = json.NewDecoder(resp.Body).Decode(&respWrite)
 	if err != nil {
 		return
+	}
+
+	if respWrite.Status == "error" {
+		return "", fmt.Errorf("%+v", respWrite)
 	}
 
 	return respWrite.Details.JobID, nil

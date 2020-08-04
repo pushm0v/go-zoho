@@ -28,7 +28,7 @@ func (suite *ZohoCrmAPIBulkWriteSuite) SetupTest() {
 	hClient := httpClient.NewHttpClient(sMock.Client())
 	suite.api = NewApiBulkWrite(Option{
 		ApiUrl:        suite.apiUrlMock,
-		FileUploadUrl: suite.apiUrlMock,
+		FileUploadUrl: suite.fileUploadUrlMock,
 		HttpClient:    hClient,
 		ApiParams:     suite.apiParamsMock,
 	})
@@ -38,7 +38,11 @@ func (suite *ZohoCrmAPIBulkWriteSuite) apiParamsMock(key string) interface{} {
 	return key
 }
 
-func (suite *ZohoCrmAPIBulkWriteSuite) apiUrlMock(url string) string {
+func (suite *ZohoCrmAPIBulkWriteSuite) apiUrlMock(url string, isBulk bool) string {
+	return fmt.Sprintf("%s%s", suite.url, url)
+}
+
+func (suite *ZohoCrmAPIBulkWriteSuite) fileUploadUrlMock(url string) string {
 	return fmt.Sprintf("%s%s", suite.url, url)
 }
 
@@ -97,12 +101,12 @@ func (suite *ZohoCrmAPIBulkWriteSuite) TestCerateJob() {
 			Method: "POST",
 			Url:    "http://some-url",
 		},
-		Resource: JobResource{
+		Resource: []JobResource{{
 			Type:        "some-type",
 			Module:      "some-module",
 			FileID:      "123",
 			IgnoreEmpty: true,
-		},
+		}},
 	}
 	JobID, err := suite.api.CreateJob(fakeParams)
 	assert.Nil(suite.T(), err, "Error should be nil")

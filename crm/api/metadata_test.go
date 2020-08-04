@@ -31,7 +31,7 @@ func (suite *ZohoCrmAPiMetadataSuite) SetupTest() {
 	})
 }
 
-func (suite *ZohoCrmAPiMetadataSuite) apiUrlMock(url string) string {
+func (suite *ZohoCrmAPiMetadataSuite) apiUrlMock(url string, isBulk bool) string {
 	return fmt.Sprintf("%s%s", suite.url, url)
 }
 
@@ -45,7 +45,6 @@ func (suite *ZohoCrmAPiMetadataSuite) serverMock() *httptest.Server {
 }
 
 func (suite *ZohoCrmAPiMetadataSuite) fieldsMock(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("%v", r.URL.String())
 	keys, ok := r.URL.Query()["module"]
 
 	if !ok || len(keys[0]) < 1 {

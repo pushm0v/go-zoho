@@ -9,7 +9,7 @@ type Option struct {
 	ApiParams     ApiParams
 }
 
-type ApiUrl func(string) string
+type ApiUrl func(string, bool) string
 type FileUploadUrl func(string) string
 type ApiOption func(*CrmApi)
 type ApiParams func(string) interface{}

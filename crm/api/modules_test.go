@@ -31,7 +31,7 @@ func (suite *ZohoCrmAPiModulesSuite) SetupTest() {
 	})
 }
 
-func (suite *ZohoCrmAPiModulesSuite) apiUrlMock(url string) string {
+func (suite *ZohoCrmAPiModulesSuite) apiUrlMock(url string, isBulk bool) string {
 	return fmt.Sprintf("%s%s", suite.url, url)
 }
 

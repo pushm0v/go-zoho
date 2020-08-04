@@ -23,6 +23,7 @@ type zoho struct {
 }
 
 type ZohoParams struct {
+	Version       crm.CrmVersion
 	GrantToken    string
 	ClientID      string
 	ClientSecret  string
@@ -43,6 +44,7 @@ func NewZoho(params ZohoParams, httpClient *http.Client) Zoho {
 		CrmURL:        params.CrmURL,
 		FileUploadURL: params.FileUploadURL,
 		ZGID:          params.ZGID,
+		Version:       params.Version,
 	}
 	var hClient http2.HttpClient
 	if httpClient == nil {

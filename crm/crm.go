@@ -7,6 +7,12 @@ import (
 	"github.com/pushm0v/go-zoho/http"
 )
 
+type CrmVersion string
+
+const (
+	VersionV2 CrmVersion = "v2"
+)
+
 type ZohoCrmClient interface {
 	Api(opts ...api.ApiOption) *api.CrmApi
 }
@@ -17,6 +23,7 @@ type zohoCrmClient struct {
 }
 
 type ZohoCrmParams struct {
+	Version       CrmVersion
 	ZGID          string
 	CrmURL        string
 	FileUploadURL string
@@ -27,6 +34,10 @@ type Option struct {
 }
 
 func NewZohoCrmClient(params ZohoCrmParams, option Option) ZohoCrmClient {
+	if params.Version == "" {
+		params.Version = VersionV2
+	}
+
 	return &zohoCrmClient{
 		Params: params,
 		Option: option,
@@ -35,19 +46,22 @@ func NewZohoCrmClient(params ZohoCrmParams, option Option) ZohoCrmClient {
 
 func (z *zohoCrmClient) newApiOption() api.Option {
 	return api.Option{
-		ApiUrl:        z.constructApiUrl,
-		FileUploadUrl: z.constructFileUPloadUrl,
+		ApiUrl:        z.constructCrmUrl,
+		FileUploadUrl: z.constructFileUploadUrl,
 		HttpClient:    z.HttpClient,
 		ApiParams:     z.getApiParams,
 	}
 }
 
-func (z *zohoCrmClient) constructApiUrl(url string) string {
-	return fmt.Sprintf("%s%s", z.Params.CrmURL, url)
+func (z *zohoCrmClient) constructCrmUrl(url string, isBulk bool) string {
+	if isBulk {
+		return fmt.Sprintf("%s/bulk/%s%s", z.Params.CrmURL, z.Params.Version, url)
+	}
+	return fmt.Sprintf("%s/%s%s", z.Params.CrmURL, z.Params.Version, url)
 }
 
-func (z *zohoCrmClient) constructFileUPloadUrl(url string) string {
-	return fmt.Sprintf("%s%s", z.Params.FileUploadURL, url)
+func (z *zohoCrmClient) constructFileUploadUrl(url string) string {
+	return fmt.Sprintf("%s/%s%s", z.Params.FileUploadURL, z.Params.Version, url)
 }
 
 func (z *zohoCrmClient) getApiParams(key string) interface{} {
