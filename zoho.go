@@ -35,7 +35,7 @@ type ZohoParams struct {
 	ZGID          string
 }
 
-func NewZoho(params ZohoParams, httpClient *http.Client) Zoho {
+func NewZoho(params ZohoParams, httpClient *http.Client, cache cache.Cache) Zoho {
 	var authParams = oauth.ZohoAuthParams{
 		ClientID:     params.ClientID,
 		ClientSecret: params.ClientSecret,
@@ -54,17 +54,13 @@ func NewZoho(params ZohoParams, httpClient *http.Client) Zoho {
 	} else {
 		hClient = http2.NewHttpClient(httpClient)
 	}
-	var defCache = defaultCache()
-	var storage = defaultStorage(defCache)
+
+	var storage = defaultStorage(cache)
 
 	return &zoho{
 		oauth: newOauthClient(authParams, hClient, storage),
 		crm:   newCrmClient(crmParams, hClient),
 	}
-}
-
-func defaultCache() cache.Cache {
-	return cache.NewCache(cache.WithLocalCache())
 }
 
 func defaultStorage(cache2 cache.Cache) *storage2.Storage {
