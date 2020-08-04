@@ -15,7 +15,7 @@ type HttpClient interface {
 	WithAuthorization(accessToken string)
 	Get(url string, params map[string]interface{}) (resp *http.Response, err error)
 	Post(url string, params map[string]interface{}) (resp *http.Response, err error)
-	PostJson(url string, params map[string]interface{}) (resp *http.Response, err error)
+	PostJson(url string, params interface{}) (resp *http.Response, err error)
 	UploadZIP(url string, params map[string]interface{}, headers map[string]interface{}, handler io.Reader) (resp *http.Response, err error)
 	BodyWriter(params map[string]interface{}) (*bytes.Buffer, *multipart.Writer)
 }
@@ -60,7 +60,7 @@ func (h *httpClient) Post(url string, params map[string]interface{}) (resp *http
 	return h.request(req)
 }
 
-func (h *httpClient) PostJson(url string, params map[string]interface{}) (resp *http.Response, err error) {
+func (h *httpClient) PostJson(url string, params interface{}) (resp *http.Response, err error) {
 	reqBody, err := json.Marshal(params)
 	if err != nil {
 		return
@@ -68,7 +68,7 @@ func (h *httpClient) PostJson(url string, params map[string]interface{}) (resp *
 
 	req, err := http.NewRequest(common.HTTP_METHOD_POST, url, bytes.NewBuffer(reqBody))
 	if err != nil {
-		return nil, fmt.Errorf("Error when create new HTTP POST request, %v", err)
+		return nil, fmt.Errorf("Error when create new HTTP POST Json request, %v", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 
