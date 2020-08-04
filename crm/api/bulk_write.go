@@ -37,6 +37,7 @@ type ApiBulkWriteJobParams struct {
 
 type ApiBulkWrite interface {
 	CreateJob(params ApiBulkWriteJobParams) (jobID string, err error)
+	JobDetails(jobID string) (result map[string]interface{}, err error)
 	UploadZIP(handler io.Reader) (fileID string, err error)
 }
 
@@ -87,6 +88,21 @@ func (bw *apiBulkWrite) CreateJob(params ApiBulkWriteJobParams) (jobID string, e
 	}
 
 	return respWrite.Details.JobID, nil
+}
+
+func (bw *apiBulkWrite) JobDetails(jobID string) (result map[string]interface{}, err error) {
+	var params = map[string]interface{}{}
+	var url = fmt.Sprintf("%s/%s", bw.option.ApiUrl(ZOHO_CRM_API_BULK_WRITE_CREATE_JOB_URL, true), jobID)
+
+	resp, err := bw.option.HttpClient.Get(url, params)
+	if err != nil {
+		return
+	}
+
+	defer resp.Body.Close()
+	err = json.NewDecoder(resp.Body).Decode(&result)
+
+	return
 }
 
 func (bw *apiBulkWrite) UploadZIP(handler io.Reader) (fileID string, err error) {
