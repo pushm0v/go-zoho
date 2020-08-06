@@ -54,31 +54,51 @@ func (z *zohoAuthClient) getURL(URL string) string {
 	return fmt.Sprintf("%s%s", z.authParams.IamURL, URL)
 }
 
+func (z *zohoAuthClient) isTokenExpired() bool {
+	return z.storage.Token.IsTokenExpired()
+}
+
+func (z *zohoAuthClient) tokenFromStorage() OauthToken {
+	accessToken := z.storage.Token.AccessToken()
+	refreshToken := z.storage.Token.RefreshToken()
+	expireTime := z.storage.Token.ExpireTime()
+
+	return OauthToken{
+		AccessToken:      accessToken,
+		RefreshToken:     refreshToken,
+		ExpiresInSeconds: int(expireTime),
+	}
+}
+
 func (z *zohoAuthClient) GenerateToken() error {
 
-	var params = map[string]interface{}{
-		"grant_type": "authorization_code",
-		"code":       z.authParams.GrantToken,
-	}
-	params = z.appendClientCredential(params)
-
-	resp, err := z.httpClient.Post(z.getURL(ZOHO_OAUTH_TOKEN_URL), params)
-	if err != nil {
-		return err
-	}
-
-	defer resp.Body.Close()
 	var token OauthToken
-	err = json.NewDecoder(resp.Body).Decode(&token)
-	if err != nil {
-		return err
-	}
+	if z.isTokenExpired() {
+		var params = map[string]interface{}{
+			"grant_type": "authorization_code",
+			"code":       z.authParams.GrantToken,
+		}
+		params = z.appendClientCredential(params)
 
-	if token.Error != "" {
-		return fmt.Errorf("Generate Token Error %v", token.Error)
-	}
+		resp, err := z.httpClient.Post(z.getURL(ZOHO_OAUTH_TOKEN_URL), params)
+		if err != nil {
+			return err
+		}
 
-	z.saveToken(token)
+		defer resp.Body.Close()
+		err = json.NewDecoder(resp.Body).Decode(&token)
+		if err != nil {
+			return err
+		}
+
+		if token.Error != "" {
+			return fmt.Errorf("Generate Token Error %v", token.Error)
+		}
+
+		z.saveToken(token)
+	} else {
+		token = z.tokenFromStorage()
+	}
 
 	if z.onSuccessFunc != nil {
 		z.onSuccessFunc(token)
@@ -115,7 +135,7 @@ func (z *zohoAuthClient) RefreshToken() error {
 		return fmt.Errorf("Refresh Token error %v", token.Error)
 	}
 
-	z.saveToken(token)
+	z.saveRefreshedToken(token)
 
 	if z.onSuccessFunc != nil {
 		z.onSuccessFunc(token)
@@ -129,5 +149,10 @@ func (z *zohoAuthClient) OnSuccessTokenGeneration(f func(token OauthToken)) {
 
 func (z *zohoAuthClient) saveToken(token OauthToken) {
 	z.storage.Token.SaveToken(token.AccessToken, token.RefreshToken, token.ExpiresInSeconds)
+	z.httpClient.WithAuthorization(token.AccessToken)
+}
+
+func (z *zohoAuthClient) saveRefreshedToken(token OauthToken) {
+	z.storage.Token.SaveAccessToken(token.AccessToken, token.ExpiresInSeconds)
 	z.httpClient.WithAuthorization(token.AccessToken)
 }

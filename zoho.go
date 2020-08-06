@@ -15,6 +15,7 @@ import (
 type Zoho interface {
 	Authenticate() error
 	Reauthenticate() error
+	WithSuccessAuthentication(f func(token oauth.OauthToken))
 	Crm() crm.ZohoCrmClient
 }
 
@@ -77,6 +78,15 @@ func newOauthClient(authParams oauth.ZohoAuthParams, httpClient http2.HttpClient
 
 func newCrmClient(crmParams crm.ZohoCrmParams, httpClient http2.HttpClient) crm.ZohoCrmClient {
 	return crm.NewZohoCrmClient(crmParams, crm.Option{HttpClient: httpClient})
+}
+
+func (z *zoho) WithSuccessAuthentication(f func(token oauth.OauthToken)) {
+	z.oauth.OnSuccessTokenGeneration(func(token oauth.OauthToken) {
+		//var newMap = map[string]interface{}{}
+		//toMap, _ := json.Marshal(token)
+		//json.Unmarshal(toMap, &newMap)
+		f(token)
+	})
 }
 
 func (z *zoho) Authenticate() error {
