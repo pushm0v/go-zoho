@@ -19,6 +19,7 @@ type authWorker struct {
 	onErrorFunc   func(error)
 	onSuccessFunc func()
 	params        AuthWorkerParams
+	tickerChan    chan bool
 }
 
 type AuthWorkerParams struct {
@@ -36,11 +37,22 @@ func NewAuthWorker(client oauth.ZohoAuthClient, params AuthWorkerParams) AuthWor
 }
 
 func (aw *authWorker) Start() {
-	aw.loopMain()
+
+	err := aw.client.GenerateToken()
+	if err != nil {
+		aw.fireError(err)
+		return
+	}
+	done := aw.loopMain()
+	aw.tickerChan = done
+	<-done
 }
 
 func (aw *authWorker) Stop() {
 	aw.isStart = false
+	if aw.tickerChan != nil {
+		aw.tickerChan <- true
+	}
 }
 
 func (aw *authWorker) OnError(f func(err error)) {
@@ -62,27 +74,40 @@ func (aw *authWorker) fireSuccess() {
 	}
 }
 
-func (aw *authWorker) loopMain() {
-	aw.isStart = true
-	err := aw.client.GenerateToken()
-	if err != nil {
-		aw.fireError(err)
-		return
-	}
-	ticker := time.NewTicker(time.Second * 1)
-	defer ticker.Stop()
-	for {
-		select {
-		case <-ticker.C:
-			remainingSeconds := aw.client.TokenExpireTime()
-			if remainingSeconds <= aw.params.SecondsBeforeRefreshToken {
-				err = aw.client.RefreshToken()
-				if err != nil {
-					aw.fireError(err)
-					return
+func (aw *authWorker) every(duration time.Duration, work func(time.Time) bool) chan bool {
+	ticker := time.NewTicker(duration)
+	stop := make(chan bool, 1)
+
+	go func() {
+		for {
+			select {
+			case time := <-ticker.C:
+				if !work(time) {
+					stop <- true
 				}
-				aw.fireSuccess()
+			case <-stop:
+				return
 			}
 		}
-	}
+	}()
+
+	return stop
+}
+
+func (aw *authWorker) loopMain() chan bool {
+	aw.isStart = true
+	var err error
+	var stop = aw.every(1*time.Second, func(time.Time) bool {
+		remainingSeconds := aw.client.TokenExpireTime()
+		if remainingSeconds <= aw.params.SecondsBeforeRefreshToken {
+			err = aw.client.RefreshToken()
+			if err != nil {
+				aw.fireError(err)
+			}
+			aw.fireSuccess()
+		}
+		return true
+	})
+
+	return stop
 }

@@ -30,7 +30,7 @@ func (suite *ZohoAuthWorkerSuite) tokenMock(w http.ResponseWriter, r *http.Reque
 		AccessToken:      "some-token",
 		RefreshToken:     "some-refresh-token",
 		ApiDomain:        "some-domain",
-		ExpiresInSeconds: 5,
+		ExpiresInSeconds: 3,
 		TokenType:        "some-token-type",
 	}
 	respByte, _ := json.Marshal(tokenResp)
@@ -48,7 +48,7 @@ func (suite *ZohoAuthWorkerSuite) serverMock() *httptest.Server {
 
 func (suite *ZohoAuthWorkerSuite) SetupTest() {
 	suite.params = AuthWorkerParams{
-		SecondsBeforeRefreshToken: 3,
+		SecondsBeforeRefreshToken: 2,
 	}
 	sMock := suite.serverMock()
 	hClient := httpClient.NewHttpClient(sMock.Client())
@@ -68,6 +68,10 @@ func (suite *ZohoAuthWorkerSuite) TestAuthWorkerStart() {
 	onErrorFunc := func(err error) {
 		assert.NotNil(suite.T(), err, "Error should be not nil")
 	}
+	onSuccessFunc := func() {
+		suite.worker.Stop()
+	}
 	suite.worker.OnError(onErrorFunc)
+	suite.worker.OnSuccess(onSuccessFunc)
 	suite.worker.Start()
 }
