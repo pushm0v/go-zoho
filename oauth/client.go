@@ -19,6 +19,7 @@ type ZohoAuthClient interface {
 	GenerateToken() error
 	RefreshToken() error
 	OnSuccessTokenGeneration(f func(token OauthToken))
+	TokenExpireTime() int
 }
 
 type zohoAuthClient struct {
@@ -100,6 +101,8 @@ func (z *zohoAuthClient) GenerateToken() error {
 		token = z.tokenFromStorage()
 	}
 
+	z.httpClient.WithAuthorization(token.AccessToken)
+
 	if z.onSuccessFunc != nil {
 		z.onSuccessFunc(token)
 	}
@@ -149,10 +152,12 @@ func (z *zohoAuthClient) OnSuccessTokenGeneration(f func(token OauthToken)) {
 
 func (z *zohoAuthClient) saveToken(token OauthToken) {
 	z.storage.Token.SaveToken(token.AccessToken, token.RefreshToken, token.ExpiresInSeconds)
-	z.httpClient.WithAuthorization(token.AccessToken)
 }
 
 func (z *zohoAuthClient) saveRefreshedToken(token OauthToken) {
 	z.storage.Token.SaveAccessToken(token.AccessToken, token.ExpiresInSeconds)
-	z.httpClient.WithAuthorization(token.AccessToken)
+}
+
+func (z *zohoAuthClient) TokenExpireTime() int {
+	return int(z.storage.Token.ExpireTime())
 }

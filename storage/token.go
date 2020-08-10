@@ -56,15 +56,17 @@ func (t *tokenStorage) loadToken(tokenName string) string {
 
 func (t *tokenStorage) SaveToken(accessToken, refreshToken string, expire int) {
 	t.cache.Set("access_token", accessToken, expire)
-	t.cache.Set("refresh_token", refreshToken, expire)
-	timenow := time.Now().Add(time.Second * time.Duration(int64(expire))).UTC()
-	t.cache.Set("expire_time", timenow.Format(common.TIME_FORMAT), -1)
+	t.cache.Set("refresh_token", refreshToken, -1)
+	timenow := time.Now().UTC()
+	t.cache.Set("expire_time", timenow.Add(time.Second*time.Duration(int64(expire))).Format(common.TIME_FORMAT), -1)
+	t.cache.Set("created_at", timenow.Format(common.TIME_FORMAT), -1)
 }
 
 func (t *tokenStorage) SaveAccessToken(accessToken string, expire int) {
 	t.cache.Set("access_token", accessToken, expire)
-	timenow := time.Now().Add(time.Second * time.Duration(int64(expire))).UTC()
-	t.cache.Set("expire_time", timenow.Format(common.TIME_FORMAT), -1)
+	timenow := time.Now().UTC()
+	t.cache.Set("expire_time", timenow.Add(time.Second*time.Duration(int64(expire))).Format(common.TIME_FORMAT), -1)
+	t.cache.Set("access_token_updated_at", timenow.Format(common.TIME_FORMAT), -1)
 }
 
 func (t *tokenStorage) getExpireTime() (expTime time.Time, err error) {
