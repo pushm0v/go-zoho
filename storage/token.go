@@ -76,6 +76,10 @@ func (t *tokenStorage) getExpireTime() (expTime time.Time, err error) {
 		return timenow, err
 	}
 
+	if expireTimeString == nil {
+		return timenow, fmt.Errorf("Expire time not found")
+	}
+
 	if expireTimeString.(string) == "" {
 		return timenow, fmt.Errorf("Expire time not found")
 	}
