@@ -12,7 +12,7 @@ import (
 )
 
 type HttpClient interface {
-	WithAuthorization(accessToken string)
+	WithAuthorizationFunc(f func() string)
 	Get(url string, params map[string]interface{}) (resp *http.Response, err error)
 	Post(url string, params map[string]interface{}) (resp *http.Response, err error)
 	PostJson(url string, params interface{}) (resp *http.Response, err error)
@@ -21,13 +21,15 @@ type HttpClient interface {
 }
 
 type httpClient struct {
-	client             *http.Client
-	authorizationToken string
+	client               *http.Client
+	useAuthorization     bool
+	onAuthorizationToken func() string
 }
 
 func NewHttpClient(client *http.Client) HttpClient {
 	return &httpClient{
-		client: client,
+		client:           client,
+		useAuthorization: false,
 	}
 }
 
@@ -102,8 +104,9 @@ func (h *httpClient) UploadZIP(url string, params map[string]interface{}, header
 
 func (h *httpClient) request(req *http.Request) (resp *http.Response, err error) {
 	req.Header.Set("User-Agent", common.HTTP_USER_AGENT)
-	if h.authorizationToken != "" {
-		req.Header.Set("Authorization", fmt.Sprintf("Zoho-oauthtoken %s", h.authorizationToken))
+	if h.useAuthorization {
+		accessToken := h.onAuthorizationToken()
+		req.Header.Set("Authorization", fmt.Sprintf("Zoho-oauthtoken %s", accessToken))
 	}
 
 	return h.client.Do(req)
@@ -120,6 +123,7 @@ func (h *httpClient) BodyWriter(params map[string]interface{}) (*bytes.Buffer, *
 	return bodyBuf, bodyWriter
 }
 
-func (h *httpClient) WithAuthorization(accessToken string) {
-	h.authorizationToken = accessToken
+func (h *httpClient) WithAuthorizationFunc(f func() string) {
+	h.useAuthorization = true
+	h.onAuthorizationToken = f
 }

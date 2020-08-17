@@ -3,6 +3,8 @@ package crm
 import (
 	"fmt"
 
+	"github.com/pushm0v/go-zoho/storage"
+
 	"github.com/pushm0v/go-zoho/crm/api"
 	"github.com/pushm0v/go-zoho/http"
 )
@@ -31,6 +33,7 @@ type ZohoCrmParams struct {
 
 type Option struct {
 	HttpClient http.HttpClient
+	Storage    *storage.Storage
 }
 
 func NewZohoCrmClient(params ZohoCrmParams, option Option) ZohoCrmClient {
@@ -45,6 +48,7 @@ func NewZohoCrmClient(params ZohoCrmParams, option Option) ZohoCrmClient {
 }
 
 func (z *zohoCrmClient) newApiOption() api.Option {
+	z.HttpClient.WithAuthorizationFunc(z.getAccessToken)
 	return api.Option{
 		ApiUrl:        z.constructCrmUrl,
 		FileUploadUrl: z.constructFileUploadUrl,
@@ -69,6 +73,10 @@ func (z *zohoCrmClient) getApiParams(key string) interface{} {
 		"ZGID": z.Params.ZGID,
 	}
 	return apiParams[key]
+}
+
+func (z *zohoCrmClient) getAccessToken() string {
+	return z.Storage.Token.AccessToken()
 }
 
 func (z *zohoCrmClient) Api(opts ...api.ApiOption) *api.CrmApi {

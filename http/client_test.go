@@ -93,3 +93,20 @@ func (suite *ZohoHttpClientSuite) TestUploadZIPRequest() {
 	assert.Equal(suite.T(), expectedURL, resp.Request.URL.String())
 	assert.Equal(suite.T(), "some-value", resp.Request.Header.Get("some-headers"))
 }
+
+func (suite *ZohoHttpClientSuite) TestWithAuthorizationFunc() {
+	cHttp := NewHttpClient(suite.httpClient)
+	expectedAccessToken := "some-token"
+	var f = func() string {
+		return expectedAccessToken
+	}
+	cHttp.WithAuthorizationFunc(f)
+	expectedMethod := "GET"
+	expectedURL := suite.httpServer.URL
+	params := map[string]interface{}{}
+	resp, err := cHttp.Get(suite.httpServer.URL, params)
+	assert.NoError(suite.T(), err, "Error should be nil")
+	assert.Equal(suite.T(), expectedMethod, resp.Request.Method)
+	assert.Equal(suite.T(), expectedURL, resp.Request.URL.String())
+	assert.Equal(suite.T(), fmt.Sprintf("Zoho-oauthtoken %s", expectedAccessToken), resp.Request.Header["Authorization"][0])
+}

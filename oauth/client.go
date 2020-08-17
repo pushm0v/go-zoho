@@ -101,8 +101,6 @@ func (z *zohoAuthClient) GenerateToken() error {
 		token = z.tokenFromStorage()
 	}
 
-	z.httpClient.WithAuthorization(token.AccessToken)
-
 	if z.onSuccessFunc != nil {
 		z.onSuccessFunc(token)
 	}

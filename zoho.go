@@ -3,8 +3,6 @@ package zoho
 import (
 	"net/http"
 
-	"github.com/pushm0v/go-zoho/cache"
-
 	"github.com/pushm0v/go-zoho/crm"
 
 	http2 "github.com/pushm0v/go-zoho/http"
@@ -35,7 +33,7 @@ type ZohoParams struct {
 	ZGID          string
 }
 
-func NewZoho(params ZohoParams, httpClient *http.Client, cache cache.Cache) Zoho {
+func NewZoho(params ZohoParams, httpClient *http.Client, storage *storage2.Storage) Zoho {
 	var authParams = oauth.ZohoAuthParams{
 		ClientID:     params.ClientID,
 		ClientSecret: params.ClientSecret,
@@ -55,16 +53,10 @@ func NewZoho(params ZohoParams, httpClient *http.Client, cache cache.Cache) Zoho
 		hClient = http2.NewHttpClient(httpClient)
 	}
 
-	var storage = defaultStorage(cache)
-
 	return &zoho{
 		oauth: newOauthClient(authParams, hClient, storage),
-		crm:   newCrmClient(crmParams, hClient),
+		crm:   newCrmClient(crmParams, hClient, storage),
 	}
-}
-
-func defaultStorage(cache2 cache.Cache) *storage2.Storage {
-	return storage2.NewStorage(cache2)
 }
 
 func defaultHttpClient() http2.HttpClient {
@@ -75,8 +67,11 @@ func newOauthClient(authParams oauth.ZohoAuthParams, httpClient http2.HttpClient
 	return oauth.NewZohoAuthClient(authParams, httpClient, storage)
 }
 
-func newCrmClient(crmParams crm.ZohoCrmParams, httpClient http2.HttpClient) crm.ZohoCrmClient {
-	return crm.NewZohoCrmClient(crmParams, crm.Option{HttpClient: httpClient})
+func newCrmClient(crmParams crm.ZohoCrmParams, httpClient http2.HttpClient, storage *storage2.Storage) crm.ZohoCrmClient {
+	return crm.NewZohoCrmClient(crmParams, crm.Option{
+		HttpClient: httpClient,
+		Storage:    storage,
+	})
 }
 
 func (z *zoho) Authenticate() error {

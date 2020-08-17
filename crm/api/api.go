@@ -1,6 +1,8 @@
 package api
 
-import "github.com/pushm0v/go-zoho/http"
+import (
+	"github.com/pushm0v/go-zoho/http"
+)
 
 type Option struct {
 	ApiUrl        ApiUrl
